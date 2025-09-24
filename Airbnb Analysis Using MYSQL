@@ -1,0 +1,343 @@
+-- Create Database
+CREATE DATABASE airbnb_analysis;
+USE airbnb_analysis;
+
+-- Create Tables
+CREATE TABLE hosts (
+    host_id INT PRIMARY KEY,
+    host_name VARCHAR(100),
+    host_since DATE,
+    host_response_time VARCHAR(50),
+    host_response_rate DECIMAL(5,2),
+    host_acceptance_rate DECIMAL(5,2),
+    host_is_superhost BOOLEAN,
+    host_listings_count INT,
+    host_identity_verified BOOLEAN
+);
+
+CREATE TABLE neighborhoods (
+    neighborhood_id INT PRIMARY KEY,
+    neighborhood_name VARCHAR(100),
+    city VARCHAR(100),
+    state VARCHAR(50),
+    country VARCHAR(50),
+    latitude DECIMAL(10,8),
+    longitude DECIMAL(11,8)
+);
+
+CREATE TABLE listings (
+    listing_id INT PRIMARY KEY,
+    host_id INT,
+    neighborhood_id INT,
+    property_type VARCHAR(100),
+    room_type VARCHAR(100),
+    accommodates INT,
+    bathrooms DECIMAL(3,1),
+    bedrooms INT,
+    beds INT,
+    price DECIMAL(10,2),
+    security_deposit DECIMAL(10,2),
+    cleaning_fee DECIMAL(10,2),
+    minimum_nights INT,
+    maximum_nights INT,
+    availability_365 INT,
+    instant_bookable BOOLEAN,
+    FOREIGN KEY (host_id) REFERENCES hosts(host_id),
+    FOREIGN KEY (neighborhood_id) REFERENCES neighborhoods(neighborhood_id)
+);
+
+CREATE TABLE amenities (
+    amenity_id INT PRIMARY KEY,
+    amenity_name VARCHAR(100)
+);
+
+CREATE TABLE listing_amenities (
+    listing_id INT,
+    amenity_id INT,
+    PRIMARY KEY (listing_id, amenity_id),
+    FOREIGN KEY (listing_id) REFERENCES listings(listing_id),
+    FOREIGN KEY (amenity_id) REFERENCES amenities(amenity_id)
+);
+
+CREATE TABLE reviews (
+    review_id INT PRIMARY KEY,
+    listing_id INT,
+    review_date DATE,
+    reviewer_id INT,
+    reviewer_name VARCHAR(100),
+    comments TEXT,
+    rating INT CHECK (rating BETWEEN 1 AND 5),
+    FOREIGN KEY (listing_id) REFERENCES listings(listing_id)
+);
+
+CREATE TABLE bookings (
+    booking_id INT PRIMARY KEY,
+    listing_id INT,
+    check_in_date DATE,
+    check_out_date DATE,
+    guests INT,
+    total_price DECIMAL(10,2),
+    booking_status VARCHAR(20),
+    booking_date DATE,
+    FOREIGN KEY (listing_id) REFERENCES listings(listing_id)
+);
+
+INSERT INTO hosts VALUES (host_id,host_name,host_since,host_response_time,host_response_rate,host_acceptance_rate,host_is_superhost,host_listings_count,host_identity_verified),
+(1,'John Smith','2018-05-15','within an hour',95.50,92.30,true,3,true),
+(2,'Maria Garcia','2019-02-20','within a few hours',87.20,85.60,false,1,true),
+(3,'David Kim','2020-11-10','within a day',82.00,78.50,false,2,true),
+(4,'Sarah Chen','2017-08-03','within an hour',98.00,96.80,true,5,true),
+(5,'Alex Johnson','2021-01-25','a few days or more',65.50,60.00,false,1,false),
+(6,'Emily Davis','2019-06-30','within an hour',99.00,97.10,true,4,true);
+
+select* from hosts;
+
+INSERT INTO neighborhoods VALUES (neighborhood_id,neighborhood_name,city,state,country,latitude,longitude),
+(1,'Downtown','Seattle','WA','USA',47.606200,-122.332100),
+(2,'Queen Anne','Seattle','WA','USA',47.634400,-122.356500),
+(3,'Capitol Hill','Seattle','WA','USA',47.621500,-122.321600),
+(4,'Ballard','Seattle','WA','USA',47.668500,-122.384100),
+(5,'Fremont','Seattle','WA','USA',47.651200,-122.350700);
+
+select* from neighborhoods;
+
+INSERT INTO listings VALUES(listing_id,host_id,neighborhood_id,property_type,room_type,accommodates,bathrooms,bedrooms,beds,price,security_deposit,cleaning_fee,minimum_nights,maximum_nights,availability_365,instant_bookable),
+(101,1,1,'Apartment','Entire home/apt',4,2.0,2,2,150.00,200.00,75.00,2,30,280,true),
+(102,2,2,'House','Private room',2,1.0,1,1,85.00,100.00,40.00,1,14,320,false),
+(103,3,3,'Apartment','Entire home/apt',2,1.0,1,1,125.00,150.00,50.00,2,60,200,true),
+(104,4,1,'Condominium','Entire home/apt',6,2.5,3,3,225.00,300.00,100.00,3,90,150,false),
+(105,5,4,'House','Private room',3,1.5,1,2,95.00,125.00,60.00,2,30,275,true),
+(106,6,5,'Townhouse','Entire home/apt',4,2.0,2,2,180.00,250.00,80.00,2,60,190,true),
+(107,1,2,'Apartment','Entire home/apt',2,1.0,1,1,140.00,0.00,65.00,1,30,310,true),
+(108,4,3,'House','Entire home/apt',8,3.0,4,4,325.00,500.00,120.00,4,180,100,false);
+
+select* from listings;
+
+insert into amenities VALUES( amenity_id,amenity_name),
+(1,'Wi-Fi'),
+(2,'Kitchen'),
+(3,'Free Parking'),
+(4,'Paid Parking'),
+(5,'Pool'),
+(6,'Hot Tub'),
+(7,'Air Conditioning'),
+(8,'Heating'),
+(9,'Washer'),
+(10,'Dryer'),
+(11,'TV'),
+(12,'Patio'),
+(13,'Gym'),
+(14,'Pet-Friendly'),
+(15,'Smoke Alarm');
+
+
+
+INSERT INTO reviews VALUES (review_id,listing_id,review_date,reviewer_id,reviewer_name,comments,rating ),
+(1001,101,'2023-06-15',5001,'Alice Brown','Great stay! The apartment was clean, modern, and in a perfect location for exploring the city. John was a very responsive host.',5),
+(1002,101,'2023-07-20',5002,'Bob Wilson','Nice place but the street noise at night was a bit loud. Everything else was excellent.',4),
+(1003,102,'2023-05-10',5003,'Carol White','Maria was lovely and her home is charming. The room was exactly as described. Great value!',5),
+(1004,103,'2023-08-05',5004,'Tom Clark','Solid apartment for the price. Good wifi, clean, and the host was easy to communicate with.',4),
+(1005,104,'2023-07-12',5005,'Diana King','Absolutely stunning condo! The views were incredible and it had every amenity we could ask for. Worth every penny.',5),
+(1006,105,'2023-09-01',5006,'Frank Miller','Comfortable room and Alex was friendly. The house is in a cool neighborhood with great restaurants.',4),
+(1007,106,'2023-08-22',5007,'Grace Lee','Perfect for our family trip. The townhouse was spacious and well-equipped. Emily provided a great guidebook for the area.',5),
+(1008,107,'2023-06-30',5008,'Henry Adams','Fantastic modern apartment. Super easy check-in and great location. Would definitely book again.',5),
+(1009,108,'2023-07-18',5009,'Iris Young','We had a large group and this house was perfect. The hot tub was a huge hit after long days of sightseeing.',5),
+(1010,101,'2023-08-10',5010,'Jack Roberts','Fantastic modern apartment. Super easy check-in and great location. Would definitely book again.',5);
+
+select* from reviews;
+
+INSERT INTO bookings VALUES(booking_id,listing_id,check_in_date,check_out_date,guests,total_price,booking_status,booking_date),
+(2001,101,'2023-06-10','2023-06-15',2,750.00,'completed','2023-05-20'),
+(2002,101,'2023-07-18','2023-07-22',3,600.00,'completed','2023-06-30'),
+(2003,102,'2023-05-05','2023-05-08',1,255.00,'completed','2023-04-15'),
+(2004,103,'2023-08-01','2023-08-07',2,750.00,'completed','2023-07-10'),
+(2005,104,'2023-07-10','2023-07-15',4,1625.00,'completed','2023-06-01'),
+(2006,105,'2023-08-28','2023-09-02',2,475.00,'completed','2023-08-01'),
+(2007,106,'2023-08-15','2023-08-20',3,900.00,'completed','2023-07-22'),
+(2008,107,'2023-06-25','2023-06-28',2,420.00,'completed','2023-06-01'),
+(2009,108,'2023-07-15','2023-07-20',6,1625.00,'completed','2023-06-05'),
+(2010,101,'2023-08-05','2023-08-10',2,750.00,'completed','2023-07-12'),
+(2011,102,'2023-09-10','2023-09-12',2,170.00,'completed','2023-08-25'),
+(2012,103,'2023-09-15','2023-09-17',1,250.00,'completed','2023-09-01');
+
+select*from bookings;
+
+INSERT INTO listing_amenities VALUES (listing_id,amenity_id),
+(101,1),
+(101,2),
+(101,3),
+(101,7),
+(101,8),
+(101,11),
+(101,15),
+(102,1),
+(102,2),
+(102,8),
+(102,11),
+(102,15),
+(103,1),
+(103,2),
+(103,4),
+(103,7),
+(103,8),
+(103,9),
+(103,10),
+(103,11),
+(103,15),
+(104,1),
+(104,2),
+(104,3),
+(104,5),
+(104,7),
+(104,8),
+(104,9),
+(104,10),
+(104,11),
+(104,12),
+(104,13),
+(104,15),
+(105,1),
+(105,2),
+(105,8),
+(105,11),
+(105,14),
+(105,15),
+(106,1),
+(106,2),
+(106,3),
+(106,7),
+(106,8),
+(106,9),
+(106,10),
+(106,11),
+(106,15),
+(107,1),
+(107,2),
+(107,7),
+(107,8),
+(107,11),
+(107,15),
+(108,1),
+(108,2),
+(108,3),
+(108,6),
+(108,7),
+(108,8),
+(108,9),
+(108,10),
+(108,11),
+(108,12),
+(108,13),
+(108,15);
+
+select* from listing_amenities;
+
+
+-- Average daily rate and occupancy rate by neighborhood
+SELECT 
+    n.neighborhood_name,
+    AVG(l.price) as avg_daily_rate,
+    COUNT(b.booking_id) * 1.0 / COUNT(DISTINCT l.listing_id) as booking_frequency,
+    AVG(DATEDIFF(b.check_out_date, b.check_in_date)) as avg_stay_length
+FROM listings l
+JOIN neighborhoods n ON l.neighborhood_id = n.neighborhood_id
+LEFT JOIN bookings b ON l.listing_id = b.listing_id
+GROUP BY n.neighborhood_name
+ORDER BY avg_daily_rate DESC;
+
+-- Superhost vs regular host performance comparison
+SELECT 
+    h.host_is_superhost,
+    COUNT(DISTINCT l.listing_id) as total_listings,
+    AVG(l.price) as avg_price,
+    AVG(r.rating) as avg_rating,
+    COUNT(b.booking_id) as total_bookings,
+    SUM(b.total_price) as total_revenue
+FROM hosts h
+JOIN listings l ON h.host_id = l.host_id
+LEFT JOIN reviews r ON l.listing_id = r.listing_id
+LEFT JOIN bookings b ON l.listing_id = b.listing_id
+GROUP BY h.host_is_superhost;
+
+-- Monthly booking patterns and revenue
+SELECT 
+    MONTH(check_in_date) as month,
+    COUNT(booking_id) as total_bookings,
+    SUM(total_price) as total_revenue,
+    AVG(total_price) as avg_booking_value,
+    AVG(DATEDIFF(check_out_date, check_in_date)) as avg_stay_duration
+FROM bookings
+WHERE YEAR(check_in_date) = 2023
+GROUP BY MONTH(check_in_date)
+ORDER BY month;
+
+-- Impact of amenities on pricing and ratings
+SELECT 
+    a.amenity_name,
+    COUNT(DISTINCT la.listing_id) as listings_with_amenity,
+    AVG(l.price) as avg_price,
+    AVG(r.rating) as avg_rating
+FROM amenities a
+JOIN listing_amenities la ON a.amenity_id = la.amenity_id
+JOIN listings l ON la.listing_id = l.listing_id
+LEFT JOIN reviews r ON l.listing_id = r.listing_id
+GROUP BY a.amenity_name
+ORDER BY listings_with_amenity DESC;
+
+-- Correlation between host response and listing success
+SELECT 
+    h.host_response_time,
+    AVG(h.host_response_rate) as avg_response_rate,
+    AVG(r.rating) as avg_rating,
+    COUNT(b.booking_id) as total_bookings
+FROM hosts h
+JOIN listings l ON h.host_id = l.host_id
+LEFT JOIN reviews r ON l.listing_id = r.listing_id
+LEFT JOIN bookings b ON l.listing_id = b.listing_id
+GROUP BY h.host_response_time
+ORDER BY avg_rating DESC;
+
+-- Identify underpriced and overpriced listings compared to neighborhood averages
+WITH neighborhood_stats AS (
+    SELECT 
+        neighborhood_id,
+        AVG(price) as avg_neighborhood_price,
+        STDDEV(price) as price_stddev
+    FROM listings
+    GROUP BY neighborhood_id
+)
+SELECT 
+    l.listing_id,
+    l.price,
+    ns.avg_neighborhood_price,
+    (l.price - ns.avg_neighborhood_price) / ns.price_stddev as price_z_score,
+    CASE 
+        WHEN (l.price - ns.avg_neighborhood_price) / ns.price_stddev > 1 THEN 'Overpriced'
+        WHEN (l.price - ns.avg_neighborhood_price) / ns.price_stddev < -1 THEN 'Underpriced'
+        ELSE 'Fairly Priced'
+    END as pricing_status
+FROM listings l
+JOIN neighborhood_stats ns ON l.neighborhood_id = ns.neighborhood_id;
+
+-- Predict future booking patterns based on historical data
+WITH monthly_trends AS (
+    SELECT 
+        MONTH(check_in_date) as month,
+        YEAR(check_in_date) as year,
+        COUNT(booking_id) as bookings,
+        AVG(total_price) as avg_revenue
+    FROM bookings
+    GROUP BY YEAR(check_in_date), MONTH(check_in_date)
+)
+SELECT 
+    month,
+    AVG(bookings) as avg_monthly_bookings,
+    AVG(avg_revenue) as avg_monthly_revenue,
+    (SELECT bookings 
+     FROM monthly_trends mt2 
+     WHERE mt2.month = mt1.month 
+     ORDER BY year DESC 
+     LIMIT 1) as last_year_bookings
+FROM monthly_trends mt1
+GROUP BY month
+ORDER BY month;
